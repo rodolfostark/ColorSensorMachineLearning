@@ -1,0 +1,5 @@
+vamos considerar as saidas esperadas no treinamento da rede neural da seguinte forma: 
+RGB (-1,0,1)
+R: -1
+G: 0
+B: 1
