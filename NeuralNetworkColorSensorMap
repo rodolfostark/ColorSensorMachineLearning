@@ -1,0 +1,89 @@
+# importando a base de dados
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import os
+import tarfile
+from six.moves import urllib
+import csv
+
+FILE_TO_DOWNLOAD =  "objetosECores.csv"
+DOWNLOAD_ROOT = "https://raw.githubusercontent.com/rodolfostark/ColorSensorMachineLearning/"
+DATA_PATH = "master/"
+DATA_URL = DOWNLOAD_ROOT + DATA_PATH + FILE_TO_DOWNLOAD
+
+def fetch_data(data_url=DATA_URL, data_path=DATA_PATH, file_to_download=FILE_TO_DOWNLOAD):
+  if not os.path.isdir(data_path):
+    os.makedirs(data_path)
+  urllib.request.urlretrieve(data_url, data_path+file_to_download)
+  
+fetch_data()
+
+# observando se o diretório datasets foi criado com sucesso 
+# !ls dados
+
+
+!ls master/
+
+leitura = csv.reader(open('master/objetosECores.csv','r'))
+leitura = list(leitura) # tem que converter pra lista primeiro
+leitura = np.array(leitura)# e depois converte pra array
+
+# sequencias de testes pra checar se o array foi gerado de forma correta
+#print (leitura)
+print("\n")
+#print(leitura[0])
+print("\n")
+#print(leitura[0][0])
+
+objetos_coloridos = leitura [-53:,:] # objeto vermelho é o array apenas numérico
+print(objetos_coloridos)
+
+# Divisão de dados em matriz de features e array de classes 
+y = objetos_coloridos[:, -1:] # classes' array  
+X = objetos_coloridos[:,:-1] # features' matrices
+
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size = 0.25, random_state = 0)
+
+# Part 2 - Now let's make the ANN!
+
+# Importing the Keras libraries and packages
+import keras
+from keras.models import Sequential
+from keras.layers import Dense
+
+# Initialising the ANN
+classifier = Sequential()
+
+# We gona use two hidden layers, 4 neurons each
+
+# Adding the input layer and the first hidden layer
+classifier.add(Dense( activation = 'tanh', input_dim = 3, units = 4, kernel_initializer = 'uniform'))
+
+# Adding the second hidden layer
+classifier.add(Dense( activation = 'tanh', units = 3, kernel_initializer = 'uniform' ))
+
+# Adding the output layer
+classifier.add(Dense( activation = 'tanh', units = 1, kernel_initializer = 'uniform'))
+
+# Compiling the ANN
+classifier.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+
+# Fitting the ANN to the Training set
+classifier.fit(X_train, y_train, batch_size = 10, epochs = 30 )
+
+# Part 3 - Making the predictions and evaluating the model
+
+# Predicting the Test set results
+y_pred = classifier.predict(X_test)
+print(X_test)
+print("\n\n")
+print(y_test)
+print("\n\n")
+print(y_pred)
+#y_pred = (y_pred > 0.5)
+
+# Making the Confusion Matrix
+from sklearn.metrics import confusion_matrix
+#cm = confusion_matrix(y_test, y_pred)
